@@ -1,8 +1,10 @@
 package com.ironsj.foodlabeling
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
@@ -12,13 +14,23 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import java.io.IOException
+import android.widget.Toast
+
+import androidx.core.app.ActivityCompat.startActivityForResult
+
+
+
 
 
 class MainActivity : AppCompatActivity() {
     companion object{
-        const val CAMERA_RESULT = 1
-        const val GALLERY_RESULT = 2
+        private const val CAMERA_RESULT = 1
+        private const val GALLERY_RESULT = 2
+        private const val MY_CAMERA_PERMISSION_CODE = 100
+        private const val MY_GALLERY_PERMISSION_CODE = 200
     }
 
     private lateinit var detecter: Detecter
@@ -46,14 +58,29 @@ class MainActivity : AppCompatActivity() {
         image.setImageBitmap(bitmap)
 
         camera.setOnClickListener {
-            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(cameraIntent, MainActivity.CAMERA_RESULT)
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(arrayOf(Manifest.permission.CAMERA), MY_CAMERA_PERMISSION_CODE)
+
+            }
+            else{
+                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                startActivityForResult(cameraIntent, MainActivity.CAMERA_RESULT)
+            }
+
         }
 
         gallery.setOnClickListener {
-            val galleryIntent = Intent(Intent.ACTION_PICK)
-            galleryIntent.type = "image/*"
-            startActivityForResult(galleryIntent, MainActivity.GALLERY_RESULT)
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), MY_GALLERY_PERMISSION_CODE)
+            }
+            else{
+                val galleryIntent = Intent(Intent.ACTION_PICK)
+                galleryIntent.type = "image/*"
+                startActivityForResult(galleryIntent, MainActivity.GALLERY_RESULT)
+            }
+
         }
 
         detect.setOnClickListener {
@@ -64,6 +91,46 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when(requestCode){
+            MY_CAMERA_PERMISSION_CODE -> {
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Toast.makeText(this, "Camera Permission Granted", Toast.LENGTH_LONG).show()
+                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    startActivityForResult(cameraIntent, MY_CAMERA_PERMISSION_CODE)
+                }
+                else {
+                    Toast.makeText(this, "Camera Permission Denied", Toast.LENGTH_LONG).show()
+                }
+                return
+            }
+
+            MY_GALLERY_PERMISSION_CODE -> {
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Toast.makeText(this, "Gallery Permission Granted", Toast.LENGTH_LONG).show()
+                    val galleryIntent = Intent(Intent.ACTION_PICK)
+                    galleryIntent.type = "image/*"
+                    startActivityForResult(galleryIntent, MainActivity.GALLERY_RESULT)
+                }
+                else {
+                    Toast.makeText(this, "Gallery Permission Denied", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            else -> {
+
+            }
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
