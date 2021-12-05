@@ -1,6 +1,11 @@
 # Android Food Labeling App Tutorial
 
 ## Overview
+My platform focus topic for my semester project in CIS 357 is TensorFlow for Android. TensorFlow is an open-source library for machine learning and artificial intelligence. TensorFlow Lite, or TF Lite, provides APIs for Mobile Apps to use TensorFlow models. The models are optimized to be more efficient on devices like mobile phones.
+
+For my project I have created a mobile app that allows Android users to take a picture or select a photo from their gallery of a food dish and the app will identify what the dish is. It will give three different options ranked by the probability of what the dish is. The user will also be able to see what these probabilities are. The TF Lite model I used was a food classification model published by Google. A link to the model can be found [here](https://tfhub.dev/google/lite-model/aiy/vision/classifier/food_V1/1).
+
+
 
 ```markdown
 Syntax highlighted code block
@@ -24,7 +29,9 @@ For more details see [Basic writing and formatting syntax](https://docs.github.c
 
 ### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/ironsj/Android-Image-Labeling-Project/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+Your Pages site will use the layout and styles from the Jekyll theme you have 
+selected in your [repository settings](https://github.com/ironsj/Android-Image-Labeling-Project/settings/pages). 
+The name of this theme is saved in the Jekyll `_config.yml` configuration file.
 
 ### Support or Contact
 
