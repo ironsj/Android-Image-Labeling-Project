@@ -13,7 +13,11 @@ The model I have chosen to implement into my app has the ability to recognize 20
 
 In the image below you can see an example of the application classifying the default image, a cheese burger. 
 
-![Example of the app running. The image shows the application correctly identifying a cheeseburger.]()
+![Example of the app running. The image shows the application correctly identifying a cheeseburger.](docs/assets/images/app-example.png)
+
+The Android user can click the camera or gallery button to use their own images as input. After they have their desired image, they press detect to get the output and identify their food dish. An example of a real world use case of this app may be if someone was given the opportunity to try some new desserts but they are not sure exactly what dish they are eating. They could take a picture of their food and the app may be able to help them with this identification. These are some of the basics regarding TensorFlow and my app. The next section will provide you with the tools needed to get started in creating the app.
+
+## Getting Started
 
 
 
