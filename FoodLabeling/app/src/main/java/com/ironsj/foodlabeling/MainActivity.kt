@@ -14,15 +14,9 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.IOException
 import android.widget.Toast
-
-import androidx.core.app.ActivityCompat.startActivityForResult
-
-
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,29 +27,31 @@ class MainActivity : AppCompatActivity() {
         private const val MY_GALLERY_PERMISSION_CODE = 200
     }
 
-    private lateinit var detecter: Detecter
+    private lateinit var detector: Detector
     private lateinit var bitmap: Bitmap
+    private lateinit var unscaledBitmap: Bitmap
 
-    val height = 350
-    val width = 350
+    private var image: ImageView? = null
+
+    private var height = 350
+    private var width = 350
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(R.layout.activity_main)
-        detecter = Detecter(this)
+        detector = Detector(this)
 
         val camera = findViewById<ImageButton>(R.id.cameraButton)
         val gallery = findViewById<ImageButton>(R.id.galleryButton)
-        val image = findViewById<ImageView>(R.id.imageView)
+        image = findViewById<ImageView>(R.id.imageView)
         val detect = findViewById<Button>(R.id.detectButton)
         val results = findViewById<TextView>(R.id.resultsTextView)
 
-
-
         bitmap = BitmapFactory.decodeResource(resources, R.drawable.burger)
+        unscaledBitmap = bitmap
         bitmap = scaleImage(bitmap)
-        image.setImageBitmap(bitmap)
+        image!!.setImageBitmap(bitmap)
 
         camera.setOnClickListener {
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -84,13 +80,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         detect.setOnClickListener {
-            val result = detecter.recognizeImage(bitmap)
+            val result = detector.recognizeImage(unscaledBitmap)
             results.text = ""
             for (i in result){
                 results.text = (results.text as String).plus(i.toString().plus("\n"))
             }
 
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        height = image!!.height
+        width = image!!.width
     }
 
     override fun onRequestPermissionsResult(
@@ -142,6 +144,7 @@ class MainActivity : AppCompatActivity() {
             if(resultCode == Activity.RESULT_OK && data !== null) {
                 results.text = ""
                 bitmap = data.extras!!.get("data") as Bitmap
+                unscaledBitmap = bitmap
                 bitmap = scaleImage(bitmap)
                 imageView.setImageBitmap(bitmap)
             }
@@ -152,6 +155,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+                unscaledBitmap = bitmap
                 bitmap = scaleImage(bitmap)
                 imageView.setImageBitmap(bitmap)
             }catch (e: IOException){
@@ -164,16 +168,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun scaleImage(bitmap: Bitmap?): Bitmap {
-        val view = findViewById<ImageView>(R.id.imageView)
+    private fun scaleImage(bitmap: Bitmap?): Bitmap {
 
-        val orignalWidth = bitmap!!.width
+        val originalWidth = bitmap!!.width
         val originalHeight = bitmap.height
 
-        val scaleWidth = width.toFloat() / orignalWidth
-        val scaleHeight = height.toFloat() / originalHeight
+        width.toFloat() / originalWidth
+        height.toFloat() / originalHeight
 
-        val nh = (originalHeight * (width.toFloat() / orignalWidth)).toInt()
+        val nh = (originalHeight * (width.toFloat() / originalWidth)).toInt()
         return Bitmap.createScaledBitmap(bitmap, width, nh, true)
     }
 }

@@ -9,7 +9,7 @@ import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.*
 
-class Detecter(val context: Context){
+class Detector(val context: Context){
 
     fun recognizeImage(bitmap: Bitmap): MutableList<Recognition> {
         val items = mutableListOf<Recognition>()
