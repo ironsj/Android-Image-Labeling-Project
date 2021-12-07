@@ -59,7 +59,85 @@ val results = findViewById<TextView>(R.id.resultsTextView)
 2. Also within _onCreate_ add `camera.setOnClickListener{}`, `gallery.setOnClickListener{}`, and `detect.setOnClickListener{}`. This will allow us to define what happens when one of our buttons are pressed.
 
 ### Permissions and Intents
-1. 
+1. Before we continue we msut specify our app requires certain permissions and uses certain hardware. Since our app will be using the user's camera and accessing their photo gallery, we must ask for permissions to do these actions. To start we must add the following to  _AndroidManifest.xml_:
+```
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<uses-feature android:name="android.hardware.camera" android:required="false" />
+```
+2. In _MainActivity_ add the following to the top of the class:
+```
+companion object{
+    private const val CAMERA_RESULT = 1
+    private const val GALLERY_RESULT = 2
+    private const val MY_CAMERA_PERMISSION_CODE = 100
+    private const val MY_GALLERY_PERMISSION_CODE = 200
+}
+```
+These will be the request codes for the four things we could possibly do in the app. They are send an intent to take a picture, send an intent to open the gallery and select a picture, request permission to use the camera, and request permission to access the user's photos.
+
+3. Now in our `camera.setOnClickListener` add the following:
+```
+if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+    != PackageManager.PERMISSION_GRANTED){
+    requestPermissions(arrayOf(Manifest.permission.CAMERA), MY_CAMERA_PERMISSION_CODE)
+}
+else{
+    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+    startActivityForResult(cameraIntent, MainActivity.CAMERA_RESULT)
+}
+```
+This will first check if we have permission to access the camera. If the user has not granted permission, a request for permission will be sent. If permission was already granted, an intent to take a picture and return the result will begin. We will do something similar in `gallery.setOnClickListener`. Add the following code in order to check for permission, and if we already have permission, start an intent to return with an image from their photo gallery:
+```
+if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+    != PackageManager.PERMISSION_GRANTED){
+    requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), MY_GALLERY_PERMISSION_CODE)
+}
+else{
+    val galleryIntent = Intent(Intent.ACTION_PICK)
+    galleryIntent.type = "image/*"
+    startActivityForResult(galleryIntent, MainActivity.GALLERY_RESULT)
+}
+```
+
+4. Now we must handle what happens when the user gives or denies permission to use the camera/gallery. Create the following function: `override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) { super.onRequestPermissionsResult(requestCode, permissions, grantResults) }`.
+5. Within this function we must handle the cases when we return from requesting permission for the camera or gallery. Add the following code to the function:
+```
+when(requestCode){
+    MY_CAMERA_PERMISSION_CODE -> {
+        if ((grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            Toast.makeText(this, "Camera Permission Granted", Toast.LENGTH_LONG).show()
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(cameraIntent, MainActivity.CAMERA_RESULT)
+        }
+        else {
+            Toast.makeText(this, "Camera Permission Denied", Toast.LENGTH_LONG).show()
+        }
+        return
+    }
+
+    MY_GALLERY_PERMISSION_CODE -> {
+        if ((grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            Toast.makeText(this, "Gallery Permission Granted", Toast.LENGTH_LONG).show()
+            val galleryIntent = Intent(Intent.ACTION_PICK)
+            galleryIntent.type = "image/*"
+            startActivityForResult(galleryIntent, MainActivity.GALLERY_RESULT)
+        }
+        else {
+            Toast.makeText(this, "Gallery Permission Denied", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    else -> {
+
+    }
+}
+```
+This code will start the proper intent when the user grants permission for a particular case, and if the user denies permission to access the camera or gallery, will display a message confirming this with the user. Now that we are able to get permission from the user and start intents to do certain activities, we must handle what happens when we return from these activities.
+
+### Returning From Intent
 
 
 
