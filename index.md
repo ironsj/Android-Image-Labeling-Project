@@ -339,4 +339,15 @@ image!!.setImageBitmap(bitmap)
 
 Now we will be able to test if our application is working correctly. Fire up your application, and to test if we integrated the TF Lite model properly, press the **Detect** button. You should now see that the model has attempted to identify what your default image was. As we can see in the following image, my application correctly identified my default image as Cheeseburger with 70.3% probability. ![Example of the app working correctly. The app correctly identifies the default image as a cheeseburger](docs/assets/images/working-app.png)
 
+## Further Discussion/Conclusions
+Throughout this tutorial you have learned how to create an Android application that uses a TensorFlow Lite model to identify various food dishes. Along with using the TensorFlow Lite Android Support Library, you gained experince working with the camera application, retreiving photos from your gallery, working with Bitmaps, and more. 
+
+It is worth noting some of the struggles I had while creating this application. It seems that since Android phones are made by many manufacturers, the way the images were presented in the app when taking a picture or selecting an image was not consistent. On some phones, taking a picture in portrait orientation caused the image to rotate 90 degrees, while it did not on others. There has also not been consistency on the image quality of taken pictures between different phones. When testing my application on a real device (Samsung Galaxy S21+), this was not a problem, but in the future I would like to come back to this project and find a way to make it consistent across all devices. Regardless, the app properly uses a TensorFlow Lite model to classify food dishes on any of these devices, accomplishing my main goal of learning more about the TensorFlow Lite Android Support Library and incorporating it into a realistic app. 
+
+There are so many interesting things you can do with the TensorFlow Lite Android Support Library beyond what was done in this project. One of these things is that you can create and train your own model to use in an application. More information on how to do so can be found at [this link](https://www.tensorflow.org/lite/guide). There are so many different things you can do with machine learning involving various things besides images such as audio, text, videos, and more. It is also worth noting that Google has their own mobile SDK that can be used on IOS and Android apps named ML Kit. It would be very interesting to see a similar project created but instead using Google's ML Kit. More information on ML Kit can be found at [this link](https://developers.google.com/ml-kit/guides).
+
+Overall, this project was a great learning experience and allowed me to become more familiar developing native Android applications, while also introducing me to the world of machine learning. I will definitely be interested in gaining more experience regarding this topic, especially when it comes to using TensorFlow.
+
+A link to the Github repository holding the code for the project can be found [here](https://github.com/ironsj/Android-Image-Labeling-Project).
+
 
