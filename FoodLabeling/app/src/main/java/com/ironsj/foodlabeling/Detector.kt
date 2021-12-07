@@ -1,15 +1,11 @@
 package com.ironsj.foodlabeling
 
 import android.content.Context
-import android.content.ContextParams
 import android.graphics.Bitmap
-import androidx.annotation.NonNull
 import com.ironsj.foodlabeling.ml.LiteModelAiyVisionClassifierFoodV11
-import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.image.TensorImage
-import java.util.*
 
-class Detector(val context: Context){
+class Detector(private val context: Context){
 
     fun recognizeImage(bitmap: Bitmap): MutableList<Recognition> {
         val items = mutableListOf<Recognition>()

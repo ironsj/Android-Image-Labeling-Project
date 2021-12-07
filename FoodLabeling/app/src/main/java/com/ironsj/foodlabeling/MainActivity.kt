@@ -145,7 +145,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val imageView = findViewById<ImageView>(R.id.imageView)
         val results = findViewById<TextView>(R.id.resultsTextView)
 
         if(requestCode == CAMERA_RESULT){
@@ -153,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                 results.text = ""
                 bitmap = data.extras!!.get("data") as Bitmap
                 bitmap = getScaledDownBitmap(bitmap, threshold, true)!!
-                imageView.setImageBitmap(bitmap)
+                image!!.setImageBitmap(bitmap)
             }
         }
         else if(requestCode == GALLERY_RESULT && data != null){
@@ -163,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
                 bitmap = getScaledDownBitmap(bitmap, height, true)!!
-                imageView.setImageBitmap(bitmap)
+                image!!.setImageBitmap(bitmap)
             }catch (e: IOException){
                 e.printStackTrace()
             }
@@ -213,17 +212,17 @@ class MainActivity : AppCompatActivity() {
         newHeight: Int,
         isNecessaryToKeepOrig: Boolean,
     ): Bitmap? {
-        val width = bm.width
-        val height = bm.height
-        val scaleWidth = newWidth.toFloat() / width
-        val scaleHeight = newHeight.toFloat() / height
+        val widthBitmap = bm.width
+        val heightBitmap = bm.height
+        val scaleWidth = newWidth.toFloat() / widthBitmap
+        val scaleHeight = newHeight.toFloat() / heightBitmap
         // CREATE A MATRIX FOR THE MANIPULATION
         val matrix = Matrix()
         // RESIZE THE BIT MAP
         matrix.postScale(scaleWidth, scaleHeight)
 
         // "RECREATE" THE NEW BITMAP
-        val resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true)
+        val resizedBitmap = Bitmap.createBitmap(bm, 0, 0, widthBitmap, heightBitmap, matrix, true)
         if (!isNecessaryToKeepOrig) {
             bm.recycle()
         }
