@@ -104,7 +104,12 @@ else{
 }
 ```
 
-4. Now we must handle what happens when the user gives or denies permission to use the camera/gallery. Create the following function: `override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) { super.onRequestPermissionsResult(requestCode, permissions, grantResults) }`.
+4. Now we must handle what happens when the user gives or denies permission to use the camera/gallery. Create the following function: 
+```
+override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) { 
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults) 
+}
+```
 5. Within this function we must handle the cases when we return from requesting permission for the camera or gallery. Add the following code to the function:
 
 ```
@@ -266,5 +271,72 @@ private fun getResizedBitmap(
 ```
 This function takes the new height and new width of the bitmap and scales the bitmap down to the proper size. This resized bitmap is then returned. We now have handled what happens when we return from the two different intents. The app should now allow the user to take a picture and see it within the app upon return. They should also be able to select a photo from their gallery and see it in the app upon return. Now, it is time to add the code that will allow us to use the TensorFlow Lite model to detect and classify the images.
 ### Detecting The Images
+1. The first thing we will do is create a data class called _Recognition_. This class will have the following code:
+```
+data class Recognition(val label:String, val confidence:Float)  {
+    override fun toString(): String {
+        return "$label / $probabilityString"
+    }
+
+    private val probabilityString = String.format("%.1f%%", confidence * 100.0f)
+}
+```
+This class will hold the labels for the output from the TF Lite model and the probability that the image is the given item. The confidence that the particular item in the class is the image will be given as a percentage. We will be able to present this output as a string on **resultsTextView**.
+2. We will now create a new Kotlin class with a primary constructor that contains `private val context: Context`. The class should look like the following:
+```
+class Detector(private val context: Context) {
+
+}
+```
+3. Within this class we will have one single function called recognizeImage that takes a bitmap as a parameter and returns a MutableList of our Recognition data class. insert the following function: `fun recognizeImage(bitmap: Bitmap): MutableList<Recognition> {}`.
+4. Within our function we must have a variable that will hold the output we wish to display to the user when they try to detect an image. Insert the following variable to the function: `val items = mutableListOf<Recognition>()`.
+5. Next, we need a variable that will hold our TensorFlow Lite model. Insert the following variable: `val model = LiteModelAiyVisionClassifierFoodV11.newInstance(context)`. This will initialize our model. 
+6. Now, we need to convert out bitmap into something that the TensorFlow Lite interpreter can analyze. Insert the following variable to the function: `val image = TensorImage.fromBitmap(bitmap)`. This will convert our bitmap into a TensorImage object. 
+7. Now that we have our model and TensorImage object, we can process the image and get output to classify the image. Insert the following code into the function:
+```
+val outputs = model.process(image).probabilityAsCategoryList.apply {
+    sortByDescending { it.score }
+}.take(3)
+```
+This uses our model to process our image. When you downloaded the TF Lite model, it contained metadata and associated files within it. One of these files would be _probability-labels.txt_. This file contains all of the possible food dishes that the model can output. When we process our image, _probabilityAsCategoryList_ returns the labels and their probability in regard to the image. Then, the probabilities are sorted in descending order and we take the top 3 probabilities (the top 3 food dishes the image most likely is).
+8. Next, for the 3 items in our output list, we will add the label and score (or probability) into our list of Recognition class objects. To do so add the following code to the function: 
+```
+for (output in outputs) {
+    items.add(Recognition(output.label, output.score))
+}
+```
+We will now have the top 3 outputs from the model in a list that can be presented to our user in the application.
+9. There are two final things we must do in our function. First we will close our model in order to release the resources we are no longer using. Add the following code to the function: `model.close()`. Then, we will return our list of Recognition objects. Add `return items`.
+10. We now will return to _MainActivity_ to add the finishing touches. First, in the global variables of the class add the following: `private lateinit var detector: Detector`.
+11. Near the top of the _onCreate_ function add `detector = Detector(this)` as follows:
+```
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+    detector = Detector(this)
+    
+    ...
+```
+12. Add the following code to _detect.setOnClickListener_: 
+```
+detect.setOnClickListener {
+    val result = detector.recognizeImage(bitmap)
+    results.text = ""
+    for (i in result){
+        results.text = (results.text as String).plus(i.toString().plus("\n"))
+    }
+
+}
+```
+This will store what is returned from the _Detector_ class in the variable _result_. Then, it will loop through our 3 Recognition objects and put each as a string in our _resultsTextView_. 
+13. Finally, to see if we have gotten everything working correctly we must add one last bit of code. In the _onCreate_ function add the following code under where you created all of the variables that used _findViewById_ to reference all of your views in the _activity_main.xml_ file: 
+```
+bitmap = BitmapFactory.decodeResource(resources, R.drawable.burger)
+bitmap = getScaledDownBitmap(bitmap, threshold, true)!!
+image!!.setImageBitmap(bitmap)
+```
+**NOTE: In the line that says `bitmap = BitmapFactory.decodeResource(resources, R.drawable.burger)`, I referenced _R.drawable.burger_. This is the name of the PNG file I added to the drawable folder in the beginning of the project. The name of this file may be different for you. Adjust accordingly.**
+
+Now we will be able to test if our application is working correctly. Fire up your application, and to test if we integrated the TF Lite model properly, press the **Detect** button. You should now see that the model has attempted to identify what your default image was. As we can see in the following image, my application correctly identified my default image as Cheeseburger with 70.3% probability. ![Example of the app working correctly. The app correctly identifies the default image as a cheeseburger](test)
 
 
