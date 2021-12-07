@@ -44,36 +44,22 @@ Now, Android Studio should be all set up in order to create the Food Labeling Ap
 4. At the very bottom of the parent view put another TextView with the _id_ **resultsTextView**. Create a constraint 16dp to the bottom of the parent from the bottom of the TextView. Place a contraint of 8dp from the left and right of the TextView to the edges of the parent. Set its _layout_width_ to 0dp and its _layout_height_ to 100dp. Make sure there is no text within the TextView. 
 5. Now, right above the **resultsTextView**, place a Button. Set the _id_ to **detectButton** and the text within it to say **Detect**. Center it within the parent and set a constraint from the bottom to the top of **resultsTextView** of 8dp. Then, click on **imageView** and create a constraint from the bottom of it to the top of **detectButton** that is 8dp.
 
-If you followed the instructions, your layout should look like this:
+If you followed the instructions, your layout should look somewhat like this:
+![Example of the layout of the application](docs/assets/images/layout_example.png)
 
-
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+### Adding Functionality
+1. We will now add some functionality to the app. In _MainActivity_ add `private var image: ImageView? = null` to the global variables. Within the _onCreate_ function add 
 ```
+val camera = findViewById<ImageButton>(R.id.cameraButton)
+val gallery = findViewById<ImageButton>(R.id.galleryButton)
+image = findViewById<ImageView>(R.id.imageView)
+val detect = findViewById<Button>(R.id.detectButton)
+val results = findViewById<TextView>(R.id.resultsTextView)
+```
+2. Also within _onCreate_ add `camera.setOnClickListener{}`, `gallery.setOnClickListener{}`, and `detect.setOnClickListener{}`. This will allow us to define what happens when one of our buttons are pressed.
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+### Permissions and Intents
+1. 
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have 
-selected in your [repository settings](https://github.com/ironsj/Android-Image-Labeling-Project/settings/pages). 
-The name of this theme is saved in the Jekyll `_config.yml` configuration file.
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
