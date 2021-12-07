@@ -60,12 +60,14 @@ val results = findViewById<TextView>(R.id.resultsTextView)
 
 ### Permissions and Intents
 1. Before we continue we msut specify our app requires certain permissions and uses certain hardware. Since our app will be using the user's camera and accessing their photo gallery, we must ask for permissions to do these actions. To start we must add the following to  _AndroidManifest.xml_:
+
 ```
 <uses-permission android:name="android.permission.CAMERA" />
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 <uses-feature android:name="android.hardware.camera" android:required="false" />
 ```
 2. In _MainActivity_ add the following to the top of the class:
+
 ```
 companion object{
     private const val CAMERA_RESULT = 1
@@ -77,6 +79,7 @@ companion object{
 These will be the request codes for the four things we could possibly do in the app. They are send an intent to take a picture, send an intent to open the gallery and select a picture, request permission to use the camera, and request permission to access the user's photos.
 
 3. Now in our `camera.setOnClickListener` add the following:
+
 ```
 if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
     != PackageManager.PERMISSION_GRANTED){
@@ -88,6 +91,7 @@ else{
 }
 ```
 This will first check if we have permission to access the camera. If the user has not granted permission, a request for permission will be sent. If permission was already granted, an intent to take a picture and return the result will begin. We will do something similar in `gallery.setOnClickListener`. Add the following code in order to check for permission, and if we already have permission, start an intent to return with an image from their photo gallery:
+
 ```
 if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
     != PackageManager.PERMISSION_GRANTED){
@@ -102,6 +106,7 @@ else{
 
 4. Now we must handle what happens when the user gives or denies permission to use the camera/gallery. Create the following function: `override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) { super.onRequestPermissionsResult(requestCode, permissions, grantResults) }`.
 5. Within this function we must handle the cases when we return from requesting permission for the camera or gallery. Add the following code to the function:
+
 ```
 when(requestCode){
     MY_CAMERA_PERMISSION_CODE -> {
@@ -139,6 +144,7 @@ This code will start the proper intent when the user grants permission for a par
 
 ### Returning From Intent
 1. The first thing we must do is introduce four new global variables. Put the following variables at the top of the class:
+
 ```
 private lateinit var bitmap: Bitmap
 private var height = 350
@@ -147,6 +153,7 @@ private var threshold = 350
 ```
 **bitmap** will hold the image that we are trying to detect within our application. A Bitmap splits an image into a coordinate system of pixels. **bitmap** will always hold the image we are working with. **height**, **width**, and **threshold** will hold the height, width, and the largest those two values of the ImageView, respectively.
 2. The height and width of the ImageView will vary by screen size, so to determine the actual height and width add the following function:
+
 ```
 override fun onWindowFocusChanged(hasFocus: Boolean) {
     super.onWindowFocusChanged(hasFocus)
@@ -161,6 +168,7 @@ override fun onWindowFocusChanged(hasFocus: Boolean) {
 }
 ```
 3. To define what happens when we return from our intents add the following code:
+
 ```
 override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
@@ -192,6 +200,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 ```
 This function defines what will happen when we return from the camera intent and gallery intent. When we return from the gallery intent it sets bitmap equal to the image the user took with their camera. The bitmap is then scaled down to fit the ImageView and is then the image on the ImageView is set to the proper image that was returned. When we return from the gallery intent we get the URI of the selected image that was returned. The URI is used to identify the resource that was selected (in this case a photo). Then, a bitmap is created from this URI and scaled down. The ImageView is then set to the selected photo returned from the intent.
 4. Now we must add the _getScaledDownBitmap_ function. Add the following function:
+
 ```
 private fun getScaledDownBitmap(
     bitmap: Bitmap,
@@ -230,6 +239,7 @@ private fun getScaledDownBitmap(
 ```
 What this function does is determine what the new height and new width of the bitmap should be to fit the ImageView. It considers multiple cases to determine how to best keep the aspect ratio of the image.
 5. In _getScaledDown_ we called _getResizedBitmap_. Add the following function:
+
 ```
 private fun getResizedBitmap(
     bm: Bitmap,
