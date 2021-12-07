@@ -337,6 +337,6 @@ image!!.setImageBitmap(bitmap)
 ```
 **NOTE: In the line that says `bitmap = BitmapFactory.decodeResource(resources, R.drawable.burger)`, I referenced _R.drawable.burger_. This is the name of the PNG file I added to the drawable folder in the beginning of the project. The name of this file may be different for you. Adjust accordingly.**
 
-Now we will be able to test if our application is working correctly. Fire up your application, and to test if we integrated the TF Lite model properly, press the **Detect** button. You should now see that the model has attempted to identify what your default image was. As we can see in the following image, my application correctly identified my default image as Cheeseburger with 70.3% probability. ![Example of the app working correctly. The app correctly identifies the default image as a cheeseburger](test)
+Now we will be able to test if our application is working correctly. Fire up your application, and to test if we integrated the TF Lite model properly, press the **Detect** button. You should now see that the model has attempted to identify what your default image was. As we can see in the following image, my application correctly identified my default image as Cheeseburger with 70.3% probability. ![Example of the app working correctly. The app correctly identifies the default image as a cheeseburger](docs/assets/images/working-app.png)
 
 
