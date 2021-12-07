@@ -208,6 +208,7 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
 }
 ```
 This function defines what will happen when we return from the camera intent and gallery intent. When we return from the gallery intent it sets bitmap equal to the image the user took with their camera. The bitmap is then scaled down to fit the ImageView and is then the image on the ImageView is set to the proper image that was returned. When we return from the gallery intent we get the URI of the selected image that was returned. The URI is used to identify the resource that was selected (in this case a photo). Then, a bitmap is created from this URI and scaled down. The ImageView is then set to the selected photo returned from the intent.
+
 4. Now we must add the _getScaledDownBitmap_ function. Add the following function:
 
 ```
@@ -247,6 +248,7 @@ private fun getScaledDownBitmap(
 }
 ```
 What this function does is determine what the new height and new width of the bitmap should be to fit the ImageView. It considers multiple cases to determine how to best keep the aspect ratio of the image.
+
 5. In _getScaledDown_ we called _getResizedBitmap_. Add the following function:
 
 ```
@@ -286,6 +288,7 @@ data class Recognition(val label:String, val confidence:Float)  {
 }
 ```
 This class will hold the labels for the output from the TF Lite model and the probability that the image is the given item. The confidence that the particular item in the class is the image will be given as a percentage. We will be able to present this output as a string on **resultsTextView**.
+
 2. We will now create a new Kotlin class with a primary constructor that contains `private val context: Context`. The class should look like the following:
 ```
 class Detector(private val context: Context) {
