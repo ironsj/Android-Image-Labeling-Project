@@ -37,7 +37,14 @@ Before the tutorial on how to create the project, it is important to set up Andr
 Now, Android Studio should be all set up in order to create the Food Labeling Application. The following section will be a step-by-step coding tutorial that can be used to create it yourself. 
 
 ## Step-By-Step Instructions
+### UI
+1. The first thing we will do is set up the UI for the application. In _activity_main.xml_, clear any constraints and widgets within the file. We will add a vertical guideline set in the middle of the screen. Then, we will place a textView that is centered between the guideline (to the left of the guideline) and the parent view with a 16dp contraint to the top of the parent view. Make the text within this textview say **Start Camera**. Put another textView on the right of the guideline with the same constraints. Make the text in this textView say **Select Photo**.
+2. Now, we will put two ImageButtons below each of these textViews. For the left ImageButton, find clipart for a camera to put inside of it. Set the id of the ImageButton to be **cameraButton**. Make sure it is centered betweent he guideline and parent view and set a top constraint of 8dp to the textView above. On the right side of the guideline, make sure the ImageButton has clipart for 'gallery' within it. This will have the same constraints as the other ImageButton.
+3. Now place an ImageView with the picture of your chosen food that is located in **res-drawable** folder. This ImageView will have a constraint of 8dp on its left and right side to the edge of the parent view. There will also be a constraint of 8dp on the top to one of the ImageButtons. Set the _layout_width_ to **match_parent** and the _layout_height_ to 0dp. Set the _id_ to **imageView**.
+4. At the very bottom of the parent view put another TextView with the _id_ **resultsTextView**. Create a constraint 16dp to the bottom of the parent from the bottom of the TextView. Place a contraint of 8dp from the left and right of the TextView to the edges of the parent. Set its _layout_width_ to 0dp and its _layout_height_ to 100dp. Make sure there is no text within the TextView. 
+5. Now, right above the **resultsTextView**, place a Button. Set the _id_ to **detectButton** and the text within it to say **Detect**. Center it within the parent and set a constraint from the bottom to the top of **resultsTextView** of 8dp. Then, click on **imageView** and create a constraint from the bottom of it to the top of **detectButton** that is 8dp.
 
+If you followed the instructions, your layout should look like this:
 
 
 
