@@ -5,8 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -17,6 +16,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import java.io.IOException
 import android.widget.Toast
+import android.graphics.Bitmap
+
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,12 +32,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var detector: Detector
     private lateinit var bitmap: Bitmap
-    private lateinit var unscaledBitmap: Bitmap
 
     private var image: ImageView? = null
 
     private var height = 350
     private var width = 350
+    private var threshold = 350
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +52,7 @@ class MainActivity : AppCompatActivity() {
         val results = findViewById<TextView>(R.id.resultsTextView)
 
         bitmap = BitmapFactory.decodeResource(resources, R.drawable.burger)
-        unscaledBitmap = bitmap
-        bitmap = scaleImage(bitmap)
+        bitmap = getScaledDownBitmap(bitmap, threshold, true)!!
         image!!.setImageBitmap(bitmap)
 
         camera.setOnClickListener {
@@ -80,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         detect.setOnClickListener {
-            val result = detector.recognizeImage(unscaledBitmap)
+            val result = detector.recognizeImage(bitmap)
             results.text = ""
             for (i in result){
                 results.text = (results.text as String).plus(i.toString().plus("\n"))
@@ -93,12 +95,18 @@ class MainActivity : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
         height = image!!.height
         width = image!!.width
+        if(height >= width){
+            threshold = height
+        }
+        else{
+            threshold = width
+        }
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when(requestCode){
@@ -107,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                             grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Toast.makeText(this, "Camera Permission Granted", Toast.LENGTH_LONG).show()
                     val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    startActivityForResult(cameraIntent, MY_CAMERA_PERMISSION_CODE)
+                    startActivityForResult(cameraIntent, MainActivity.CAMERA_RESULT)
                 }
                 else {
                     Toast.makeText(this, "Camera Permission Denied", Toast.LENGTH_LONG).show()
@@ -144,8 +152,7 @@ class MainActivity : AppCompatActivity() {
             if(resultCode == Activity.RESULT_OK && data !== null) {
                 results.text = ""
                 bitmap = data.extras!!.get("data") as Bitmap
-                unscaledBitmap = bitmap
-                bitmap = scaleImage(bitmap)
+                bitmap = getScaledDownBitmap(bitmap, threshold, true)!!
                 imageView.setImageBitmap(bitmap)
             }
         }
@@ -155,28 +162,71 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-                unscaledBitmap = bitmap
-                bitmap = scaleImage(bitmap)
+                bitmap = getScaledDownBitmap(bitmap, height, true)!!
                 imageView.setImageBitmap(bitmap)
             }catch (e: IOException){
                 e.printStackTrace()
             }
 
-            bitmap = scaleImage(bitmap)
-
 
         }
     }
 
-    private fun scaleImage(bitmap: Bitmap?): Bitmap {
+    private fun getScaledDownBitmap(
+        bitmap: Bitmap,
+        threshold: Int,
+        isNecessaryToKeepOrig: Boolean,
+    ): Bitmap? {
+        val width = bitmap.width
+        val height = bitmap.height
+        var newWidth = width
+        var newHeight = height
+        if (width > height && width > threshold) {
+            newWidth = threshold
+            newHeight = (height * newWidth.toFloat() / width).toInt()
+        }
+        if (width in (height + 1)..threshold) {
+            //the bitmap is already smaller than our required dimension, no need to resize it
+            return bitmap
+        }
+        if (width < height && height > threshold) {
+            newHeight = threshold
+            newWidth = (width * newHeight.toFloat() / height).toInt()
+        }
+        if (height in (width + 1)..threshold) {
+            //the bitmap is already smaller than our required dimension, no need to resize it
+            return bitmap
+        }
+        if (width == height && width > threshold) {
+            newWidth = threshold
+            newHeight = newWidth
+        }
+        return if (width == height && width <= threshold) {
+            //the bitmap is already smaller than our required dimension, no need to resize it
+            bitmap
+        } else getResizedBitmap(bitmap, newWidth, newHeight, isNecessaryToKeepOrig)
+    }
 
-        val originalWidth = bitmap!!.width
-        val originalHeight = bitmap.height
+    private fun getResizedBitmap(
+        bm: Bitmap,
+        newWidth: Int,
+        newHeight: Int,
+        isNecessaryToKeepOrig: Boolean,
+    ): Bitmap? {
+        val width = bm.width
+        val height = bm.height
+        val scaleWidth = newWidth.toFloat() / width
+        val scaleHeight = newHeight.toFloat() / height
+        // CREATE A MATRIX FOR THE MANIPULATION
+        val matrix = Matrix()
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight)
 
-        width.toFloat() / originalWidth
-        height.toFloat() / originalHeight
-
-        val nh = (originalHeight * (width.toFloat() / originalWidth)).toInt()
-        return Bitmap.createScaledBitmap(bitmap, width, nh, true)
+        // "RECREATE" THE NEW BITMAP
+        val resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true)
+        if (!isNecessaryToKeepOrig) {
+            bm.recycle()
+        }
+        return resizedBitmap
     }
 }
