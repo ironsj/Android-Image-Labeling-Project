@@ -138,6 +138,123 @@ when(requestCode){
 This code will start the proper intent when the user grants permission for a particular case, and if the user denies permission to access the camera or gallery, will display a message confirming this with the user. Now that we are able to get permission from the user and start intents to do certain activities, we must handle what happens when we return from these activities.
 
 ### Returning From Intent
+1. The first thing we must do is introduce four new global variables. Put the following variables at the top of the class:
+```
+private lateinit var bitmap: Bitmap
+private var height = 350
+private var width = 350
+private var threshold = 350
+```
+**bitmap** will hold the image that we are trying to detect within our application. A Bitmap splits an image into a coordinate system of pixels. **bitmap** will always hold the image we are working with. **height**, **width**, and **threshold** will hold the height, width, and the largest those two values of the ImageView, respectively.
+2. The height and width of the ImageView will vary by screen size, so to determine the actual height and width add the following function:
+```
+override fun onWindowFocusChanged(hasFocus: Boolean) {
+    super.onWindowFocusChanged(hasFocus)
+    height = image!!.height
+    width = image!!.width
+    if(height >= width){
+        threshold = height
+    }
+    else{
+        threshold = width
+    }
+}
+```
+3. To define what happens when we return from our intents add the following code:
+```
+override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    val results = findViewById<TextView>(R.id.resultsTextView)
 
+    if(requestCode == CAMERA_RESULT){
+        if(resultCode == Activity.RESULT_OK && data !== null) {
+            results.text = ""
+            bitmap = data.extras!!.get("data") as Bitmap
+            bitmap = getScaledDownBitmap(bitmap, threshold, true)!!
+            image!!.setImageBitmap(bitmap)
+        }
+    }
+    else if(requestCode == GALLERY_RESULT && data != null){
+        results.text = ""
+        val uri = data.data
+
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+            bitmap = getScaledDownBitmap(bitmap, height, true)!!
+            image!!.setImageBitmap(bitmap)
+        }catch (e: IOException){
+            e.printStackTrace()
+        }
+
+
+    }
+}
+```
+This function defines what will happen when we return from the camera intent and gallery intent. When we return from the gallery intent it sets bitmap equal to the image the user took with their camera. The bitmap is then scaled down to fit the ImageView and is then the image on the ImageView is set to the proper image that was returned. When we return from the gallery intent we get the URI of the selected image that was returned. The URI is used to identify the resource that was selected (in this case a photo). Then, a bitmap is created from this URI and scaled down. The ImageView is then set to the selected photo returned from the intent.
+4. Now we must add the _getScaledDownBitmap_ function. Add the following function:
+```
+private fun getScaledDownBitmap(
+    bitmap: Bitmap,
+    threshold: Int,
+    isNecessaryToKeepOrig: Boolean,
+): Bitmap? {
+    val width = bitmap.width
+    val height = bitmap.height
+    var newWidth = width
+    var newHeight = height
+    if (width > height && width > threshold) {
+        newWidth = threshold
+        newHeight = (height * newWidth.toFloat() / width).toInt()
+    }
+    if (width in (height + 1)..threshold) {
+        //the bitmap is already smaller than our required dimension, no need to resize it
+        return bitmap
+    }
+    if (width < height && height > threshold) {
+        newHeight = threshold
+        newWidth = (width * newHeight.toFloat() / height).toInt()
+    }
+    if (height in (width + 1)..threshold) {
+        //the bitmap is already smaller than our required dimension, no need to resize it
+        return bitmap
+    }
+    if (width == height && width > threshold) {
+        newWidth = threshold
+        newHeight = newWidth
+    }
+    return if (width == height && width <= threshold) {
+        //the bitmap is already smaller than our required dimension, no need to resize it
+        bitmap
+    } else getResizedBitmap(bitmap, newWidth, newHeight, isNecessaryToKeepOrig)
+}
+```
+What this function does is determine what the new height and new width of the bitmap should be to fit the ImageView. It considers multiple cases to determine how to best keep the aspect ratio of the image.
+5. In _getScaledDown_ we called _getResizedBitmap_. Add the following function:
+```
+private fun getResizedBitmap(
+    bm: Bitmap,
+    newWidth: Int,
+    newHeight: Int,
+    isNecessaryToKeepOrig: Boolean,
+): Bitmap? {
+    val widthBitmap = bm.width
+    val heightBitmap = bm.height
+    val scaleWidth = newWidth.toFloat() / widthBitmap
+    val scaleHeight = newHeight.toFloat() / heightBitmap
+    // CREATE A MATRIX FOR THE MANIPULATION
+    val matrix = Matrix()
+    // RESIZE THE BIT MAP
+    matrix.postScale(scaleWidth, scaleHeight)
+
+    // "RECREATE" THE NEW BITMAP
+    val resizedBitmap = Bitmap.createBitmap(bm, 0, 0, widthBitmap, heightBitmap, matrix, true)
+    if (!isNecessaryToKeepOrig) {
+        bm.recycle()
+    }
+    return resizedBitmap
+}
+```
+This function takes the new height and new width of the bitmap and scales the bitmap down to the proper size. This resized bitmap is then returned. We now have handled what happens when we return from the two different intents. The app should now allow the user to take a picture and see it within the app upon return. They should also be able to select a photo from their gallery and see it in the app upon return. Now, it is time to add the code that will allow us to use the TensorFlow Lite model to detect and classify the images.
+### Detecting The Images
 
 
