@@ -104,12 +104,15 @@ else{
 }
 ```
 
+
 4. Now we must handle what happens when the user gives or denies permission to use the camera/gallery. Create the following function: 
+
 ```
 override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) { 
     super.onRequestPermissionsResult(requestCode, permissions, grantResults) 
 }
 ```
+
 5. Within this function we must handle the cases when we return from requesting permission for the camera or gallery. Add the following code to the function:
 
 ```
@@ -157,6 +160,7 @@ private var width = 350
 private var threshold = 350
 ```
 **bitmap** will hold the image that we are trying to detect within our application. A Bitmap splits an image into a coordinate system of pixels. **bitmap** will always hold the image we are working with. **height**, **width**, and **threshold** will hold the height, width, and the largest those two values of the ImageView, respectively.
+
 2. The height and width of the ImageView will vary by screen size, so to determine the actual height and width add the following function:
 
 ```
@@ -299,6 +303,7 @@ val outputs = model.process(image).probabilityAsCategoryList.apply {
 }.take(3)
 ```
 This uses our model to process our image. When you downloaded the TF Lite model, it contained metadata and associated files within it. One of these files would be _probability-labels.txt_. This file contains all of the possible food dishes that the model can output. When we process our image, _probabilityAsCategoryList_ returns the labels and their probability in regard to the image. Then, the probabilities are sorted in descending order and we take the top 3 probabilities (the top 3 food dishes the image most likely is).
+
 8. Next, for the 3 items in our output list, we will add the label and score (or probability) into our list of Recognition class objects. To do so add the following code to the function: 
 ```
 for (output in outputs) {
@@ -306,8 +311,11 @@ for (output in outputs) {
 }
 ```
 We will now have the top 3 outputs from the model in a list that can be presented to our user in the application.
+
 9. There are two final things we must do in our function. First we will close our model in order to release the resources we are no longer using. Add the following code to the function: `model.close()`. Then, we will return our list of Recognition objects. Add `return items`.
+
 10. We now will return to _MainActivity_ to add the finishing touches. First, in the global variables of the class add the following: `private lateinit var detector: Detector`.
+
 11. Near the top of the _onCreate_ function add `detector = Detector(this)` as follows:
 ```
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -329,6 +337,7 @@ detect.setOnClickListener {
 }
 ```
 This will store what is returned from the _Detector_ class in the variable _result_. Then, it will loop through our 3 Recognition objects and put each as a string in our _resultsTextView_. 
+
 13. Finally, to see if we have gotten everything working correctly we must add one last bit of code. In the _onCreate_ function add the following code under where you created all of the variables that used _findViewById_ to reference all of your views in the _activity_main.xml_ file: 
 ```
 bitmap = BitmapFactory.decodeResource(resources, R.drawable.burger)
